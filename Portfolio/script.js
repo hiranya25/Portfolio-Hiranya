@@ -237,23 +237,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 message: document.getElementById('f-message').value
             };
 
-            fetch('/submit-feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(newFeedback)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        addFeedbackCard(newFeedback); // Add to UI immediately
-                        feedbackForm.reset();
-                        modal.style.display = 'none';
-                        alert('Thank you for your feedback!');
-                    } else {
-                        alert('Error submitting feedback. Please try again.');
-                    }
+             // Use EmailJS for static hosting (Vercel/GitHub Pages)
+            const serviceID = "service_q6lieqp";
+            const templateID = "template_ymrylf5";
+
+            const templateParams = {
+                user_name: newFeedback.name,
+                user_email: "Portfolio Feedback", // No email field in feedback form
+                message: `${newFeedback.message} \n\n[Role: ${newFeedback.role}]`
+            };
+
+            emailjs.send(serviceID, templateID, templateParams)
+                .then(() => {
+                    addFeedbackCard(newFeedback); // Add to UI immediately
+                    feedbackForm.reset();
+                    modal.style.display = 'none';
+                    alert('Thank you! Your feedback has been sent.');
                 })
                .catch(error => {
                     console.error('Error:', error);
@@ -302,4 +301,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 
