@@ -179,8 +179,24 @@ if (hamburger && navMenu) {
     });
 }
 // ===============================
-// FEEDBACK SYSTEM (JSON Storage)
+// FEEDBACK SYSTEM (Firebase Firestore)
 // ===============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// TODO: PASTE YOUR FIREBASE CONFIGURATION HERE
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY_HERE",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 document.addEventListener('DOMContentLoaded', () => {
     const feedbackTrack = document.getElementById('feedback-track');
     const addBtn = document.getElementById('add-feedback-btn');
@@ -188,20 +204,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close-modal');
     const feedbackForm = document.getElementById('feedback-form');
 
-    // 1. Load Feedback
-    loadFeedback();
+     // 1. Real-time Feedback Listener
+    // Replaces loadFeedback() with a live connection
+    const q = query(collection(db, "feedback"), orderBy("timestamp", "desc"));
 
-    function loadFeedback() {
-        fetch('feedback.json')
-            .then(response => response.json())
-            .then(data => {
-                feedbackTrack.innerHTML = ''; // Clear existing
-                data.forEach(item => {
-                    addFeedbackCard(item);
-                });
-            })
-            .catch(error => console.error('Error loading feedback:', error));
-    }
+    onSnapshot(q, (snapshot) => {
+        feedbackTrack.innerHTML = ''; // Clear current list
+        snapshot.forEach((doc) => {
+            addFeedbackCard(doc.data());
+        });
+    }, (error) => {
+        console.error("Error getting feedback:", error);
+        // Fallback or empty state if needed
+        if (error.code === 'permission-denied') {
+            feedbackTrack.innerHTML = '<p style="color:#cfcfcf; padding: 20px;">Feedback loading... (Check Firebase Console -> Firestore Database -> Rules. Set read/write to true for testing.)</p>';
+        }
+    });
+
 
     // 2. Render Card
     function addFeedbackCard(data) {
@@ -228,39 +247,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Handle Form Submission
     if (feedbackForm) {
-        feedbackForm.addEventListener('submit', (e) => {
+        feedbackForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
 
             const newFeedback = {
                 name: document.getElementById('f-name').value,
                 role: document.getElementById('f-role').value,
-                message: document.getElementById('f-message').value
+                message: document.getElementById('f-message').value,
+                timestamp: serverTimestamp() // Add server time
             };
 
-             // Use EmailJS for static hosting (Vercel/GitHub Pages)
-            const serviceID = "service_q6lieqp";
-            const templateID = "template_ymrylf5";
+            try {
+                await addDoc(collection(db, "feedback"), newFeedback);
 
-            const templateParams = {
-                user_name: newFeedback.name,
-                user_email: "Portfolio Feedback", // No email field in feedback form
-                message: `${newFeedback.message} \n\n[Role: ${newFeedback.role}]`
-            };
+                // Success
+                feedbackForm.reset();
+                modal.style.display = 'none';
+                alert('Thank you! Your feedback is live.');
 
-            emailjs.send(serviceID, templateID, templateParams)
-                .then(() => {
-                    addFeedbackCard(newFeedback); // Add to UI immediately
-                    feedbackForm.reset();
-                    modal.style.display = 'none';
-                    alert('Thank you! Your feedback has been sent.');
-                })
-               .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error: Could not connect to the server. If this is deployed on a static site (like GitHub Pages), the Python backend will not work.');
-                });
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Error saving feedback. Make sure you set up Firestore Database in your Firebase Console.");
+            } finally {
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+            }
         });
     }
-
     // 4. Modal Interactions
     if (addBtn) {
         addBtn.addEventListener('click', () => {
@@ -301,5 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
 
 
