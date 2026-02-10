@@ -1,4 +1,4 @@
-![Logo](cp.png)
+![Logo](logo.png)
 
 # Hiranya Patil - Portfolio Showcase 💻
 
