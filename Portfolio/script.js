@@ -255,7 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         alert('Error submitting feedback. Please try again.');
                     }
                 })
-                .catch(error => console.error('Error:', error));
+               .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: Could not connect to the server. If this is deployed on a static site (like GitHub Pages), the Python backend will not work.');
+                });
         });
     }
 
@@ -299,3 +302,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
