@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Alex Johnson",
+        "role": "Senior Project Manager",
+        "message": "Hiranya is a dedicated developer with a keen eye for detail. His work on our project was exceptional, delivering high-quality code and a beautiful user interface."
+    },
+    {
+        "name": "Sarah Williams",
+        "role": "Tech Lead, StartUp Inc.",
+        "message": "Working with Hiranya was a breeze. He understood our requirements perfectly and implemented solutions that exceeded our expectations. Highly recommended!"
+    },
+    {
+        "name": "Michael Brown",
+        "role": "CEO, Creative Agency",
+        "message": "The responsiveness and attention to detail Hiranya brings to the table are unmatched. Our new website looks fantastic on all devices."
+    },
+    {
+        "name": "Emily Davis",
+        "role": "Product Owner",
+        "message": "Excellent communication and technical skills. Hiranya delivered the project on time and with great quality. Will definitely work with him again."
+    },
+    {
+        "name": "Hiranya",
+        "role": "Hiranya Codes",
+        "message": "Good at Frontent Designing"
+    }
+]
