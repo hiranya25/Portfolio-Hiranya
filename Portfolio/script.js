@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+
 // ===============================
 // MOBILE MENU TOGGLE
 // ===============================
@@ -177,3 +178,124 @@ if (hamburger && navMenu) {
         });
     });
 }
+// ===============================
+// FEEDBACK SYSTEM (JSON Storage)
+// ===============================
+document.addEventListener('DOMContentLoaded', () => {
+    const feedbackTrack = document.getElementById('feedback-track');
+    const addBtn = document.getElementById('add-feedback-btn');
+    const modal = document.getElementById('feedback-modal');
+    const closeBtn = document.querySelector('.close-modal');
+    const feedbackForm = document.getElementById('feedback-form');
+
+    // 1. Load Feedback
+    loadFeedback();
+
+    function loadFeedback() {
+        fetch('feedback.json')
+            .then(response => response.json())
+            .then(data => {
+                feedbackTrack.innerHTML = ''; // Clear existing
+                data.forEach(item => {
+                    addFeedbackCard(item);
+                });
+            })
+            .catch(error => console.error('Error loading feedback:', error));
+    }
+
+    // 2. Render Card
+    function addFeedbackCard(data) {
+        const card = document.createElement('div');
+        card.className = 'feedback-card';
+        card.innerHTML = `
+            <div class="quote-icon">
+                <i class="fas fa-quote-left"></i>
+            </div>
+            <p class="feedback-text">"${data.message}"</p>
+            <div class="client-info">
+                <div class="client-details">
+                    <h4>${data.name}</h4>
+                    <span>${data.role}</span>
+                </div>
+            </div>
+        `;
+
+        feedbackTrack.appendChild(card);
+
+        // Re-apply tilt effect to the new card
+        applyTilt(card);
+    }
+
+    // 3. Handle Form Submission
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newFeedback = {
+                name: document.getElementById('f-name').value,
+                role: document.getElementById('f-role').value,
+                message: document.getElementById('f-message').value
+            };
+
+            fetch('/submit-feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newFeedback)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        addFeedbackCard(newFeedback); // Add to UI immediately
+                        feedbackForm.reset();
+                        modal.style.display = 'none';
+                        alert('Thank you for your feedback!');
+                    } else {
+                        alert('Error submitting feedback. Please try again.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // 4. Modal Interactions
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Tilt Helper
+    function applyTilt(card) {
+        card.addEventListener("mousemove", (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+        });
+
+        card.addEventListener("mouseleave", () => {
+            card.style.transform = "perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)";
+        });
+    }
+});
