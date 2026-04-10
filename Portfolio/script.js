@@ -136,7 +136,7 @@ cards.forEach((card) => {
 (function () {
     // https://dashboard.emailjs.com/admin/account
     emailjs.init({
-        publicKey: "j55OgS5dZ3DHe9plE",
+        publicKey: "YBMiKunbDgZEE26dR",
     });
 })();
 
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         contactForm.addEventListener('submit', function (event) {
             event.preventDefault();
             // these IDs from the previous steps
-            emailjs.sendForm('service_q6lieqp', 'template_ymrylf5', this)
+            emailjs.sendForm('service_9xqmlvq', 'template_kvgkvkk', this)
                 .then(() => {
                     console.log('SUCCESS!');
                     alert('Message sent successfully!');
